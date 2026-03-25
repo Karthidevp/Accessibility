@@ -1,0 +1,248 @@
+/* =========================
+   ACTIVE BUTTON
+========================= */
+
+.a11y-group button.active {
+
+  background: #5b3b6f;
+  color: white;
+
+  box-shadow: 0 0 0 2px #c9a9db inset;
+
+}
+
+.a11y-card.active {
+
+  background: #5b3b6f;
+  color: white;
+
+}
+
+/* =========================
+   FLOAT BUTTON
+========================= */
+
+.a11y-float {
+
+  position: fixed;
+  right: 20px;
+  top: 100px;
+
+  z-index: 9999;
+
+  width: 48px;
+  height: 48px;
+
+  border-radius: 12px;
+
+  background: #5b3b6f;
+  color: white;
+
+  border: none;
+
+  font-size: 22px;
+
+  cursor: pointer;
+
+  box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+
+  transition: 0.2s;
+}
+
+.a11y-float:hover {
+  transform: scale(1.05);
+}
+
+
+
+/* =========================
+   PANEL
+========================= */
+
+.a11y-container {
+
+  position: fixed;
+  right: 0;
+  top: 0;
+
+  width: 360px;
+  height: 100%;
+
+  background: #f7f7f7;
+
+  box-shadow: -4px 0 10px rgba(0,0,0,0.25);
+
+  z-index: 9999;
+
+  display: flex;
+  flex-direction: column;
+
+  font-family: Arial, sans-serif;
+
+}
+
+
+
+/* =========================
+   HEADER
+========================= */
+
+.a11y-header {
+
+  background: #5b3b6f;
+  color: white;
+
+  padding: 14px;
+
+  font-weight: bold;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  font-size: 16px;
+}
+
+.a11y-close {
+
+  cursor: pointer;
+  font-size: 18px;
+
+}
+
+
+
+/* =========================
+   GRID
+========================= */
+
+.a11y-grid {
+
+  padding: 12px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 14px;
+
+  overflow-y: auto;
+
+}
+
+
+
+/* =========================
+   GROUP
+========================= */
+
+.a11y-group {
+
+  background: white;
+
+  border-radius: 10px;
+
+  padding: 10px;
+
+  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+
+}
+
+.a11y-group p {
+
+  margin: 0 0 6px 0;
+
+  font-size: 13px;
+  font-weight: bold;
+
+}
+
+
+
+/* =========================
+   BUTTON ROW
+========================= */
+
+.a11y-group button {
+
+  margin: 3px;
+
+  padding: 6px 8px;
+
+  border: none;
+
+  border-radius: 6px;
+
+  font-size: 12px;
+
+  background: #e5e5e5;
+
+  cursor: pointer;
+
+  transition: 0.15s;
+
+}
+
+.a11y-group button:hover {
+
+  background: #d0c2db;
+
+}
+
+
+
+/* =========================
+   CARD (single toggle)
+========================= */
+
+.a11y-card {
+
+  background: white;
+
+  border-radius: 10px;
+
+  padding: 12px;
+
+  text-align: center;
+
+  cursor: pointer;
+
+  box-shadow: 0 2px 5px rgba(0,0,0,0.15);
+
+  transition: 0.15s;
+
+}
+
+.a11y-card:hover {
+
+  background: #eee;
+
+}
+
+
+
+/* =========================
+   SCROLLBAR
+========================= */
+
+.a11y-container::-webkit-scrollbar {
+  width: 6px;
+}
+
+.a11y-container::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 4px;
+}
+
+
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media (max-width: 600px) {
+
+  .a11y-container {
+    width: 100%;
+  }
+
+}

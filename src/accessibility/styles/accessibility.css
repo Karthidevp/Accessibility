@@ -1,0 +1,220 @@
+/* =========================
+   CONTRAST MODES
+========================= */
+
+.a11y-contrast-invert {
+  filter: invert(1) hue-rotate(180deg);
+}
+
+.a11y-contrast-dark {
+  background: black !important;
+  color: yellow !important;
+}
+
+.a11y-contrast-dark a {
+  color: cyan !important;
+}
+
+.a11y-contrast-light {
+  background: white !important;
+  color: black !important;
+}
+
+
+
+/* =========================
+   HIGHLIGHT LINKS
+========================= */
+
+.a11y-links a {
+  text-decoration: underline !important;
+  outline: 2px solid red !important;
+}
+
+
+
+/* =========================
+   TEXT SIZE LEVELS
+========================= */
+
+.a11y-text-1 {
+  font-size: 110%;
+}
+
+.a11y-text-2 {
+  font-size: 120%;
+}
+
+.a11y-text-3 {
+  font-size: 130%;
+}
+
+.a11y-text-4 {
+  font-size: 150%;
+}
+
+
+
+/* =========================
+   TEXT SPACING LEVELS
+========================= */
+
+.a11y-spacing-1 {
+  letter-spacing: 1px;
+  word-spacing: 2px;
+}
+
+.a11y-spacing-2 {
+  letter-spacing: 2px;
+  word-spacing: 3px;
+}
+
+.a11y-spacing-3 {
+  letter-spacing: 3px;
+  word-spacing: 4px;
+}
+
+
+
+/* =========================
+   LINE HEIGHT
+========================= */
+
+.a11y-line-1 {
+  line-height: 1.5;
+}
+
+.a11y-line-2 {
+  line-height: 1.75;
+}
+
+.a11y-line-3 {
+  line-height: 2;
+}
+
+
+
+/* =========================
+   TEXT ALIGN
+========================= */
+
+.a11y-align-left {
+  text-align: left !important;
+}
+
+.a11y-align-center {
+  text-align: center !important;
+}
+
+.a11y-align-right {
+  text-align: right !important;
+}
+
+.a11y-align-justify {
+  text-align: justify !important;
+}
+
+
+
+/* =========================
+   FONT MODES
+========================= */
+
+.a11y-font-dyslexia {
+  font-family: Arial, Helvetica, sans-serif !important;
+}
+
+.a11y-font-readable {
+  font-family: Verdana, Tahoma, sans-serif !important;
+}
+
+
+
+/* =========================
+   CURSOR MODES
+========================= */
+
+.a11y-cursor-big,
+.a11y-cursor-big * {
+  cursor: pointer !important;
+}
+
+.a11y-cursor-guide::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: red;
+  pointer-events: none;
+}
+
+.a11y-cursor-mask {
+  background: rgba(0,0,0,0.1);
+}
+
+
+
+/* =========================
+   SATURATION
+========================= */
+
+.a11y-sat-low {
+  filter: saturate(0.5);
+}
+
+.a11y-sat-high {
+  filter: saturate(2);
+}
+
+.a11y-sat-desat {
+  filter: grayscale(1);
+}
+
+
+
+/* =========================
+   BOOLEAN FEATURES
+========================= */
+
+.a11y-noanim * {
+  animation: none !important;
+  transition: none !important;
+}
+
+.a11y-hideimg img {
+  display: none !important;
+}
+
+.a11y-tooltips [title] {
+  position: relative;
+}
+
+
+
+/* =========================
+   TOOLTIP STYLE
+========================= */
+
+.a11y-tooltips [title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  background: black;
+  color: white;
+  padding: 4px 6px;
+  font-size: 12px;
+  top: 100%;
+  left: 0;
+  white-space: nowrap;
+  z-index: 9999;
+}
+
+
+
+/* =========================
+   SAFETY FIX
+========================= */
+
+body[class*="a11y-"] img.a11y-icon {
+  display: inline !important;
+}

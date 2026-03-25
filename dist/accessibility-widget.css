@@ -1,0 +1,238 @@
+/* src/accessibility/styles/accessibility.css */
+.a11y-contrast-invert {
+  filter: invert(1) hue-rotate(180deg);
+}
+.a11y-contrast-dark {
+  background: black !important;
+  color: yellow !important;
+}
+.a11y-contrast-dark a {
+  color: cyan !important;
+}
+.a11y-contrast-light {
+  background: white !important;
+  color: black !important;
+}
+.a11y-links a {
+  text-decoration: underline !important;
+  outline: 2px solid red !important;
+}
+.a11y-text-1 {
+  font-size: 110%;
+}
+.a11y-text-2 {
+  font-size: 120%;
+}
+.a11y-text-3 {
+  font-size: 130%;
+}
+.a11y-text-4 {
+  font-size: 150%;
+}
+.a11y-spacing-1 {
+  letter-spacing: 1px;
+  word-spacing: 2px;
+}
+.a11y-spacing-2 {
+  letter-spacing: 2px;
+  word-spacing: 3px;
+}
+.a11y-spacing-3 {
+  letter-spacing: 3px;
+  word-spacing: 4px;
+}
+.a11y-line-1 {
+  line-height: 1.5;
+}
+.a11y-line-2 {
+  line-height: 1.75;
+}
+.a11y-line-3 {
+  line-height: 2;
+}
+.a11y-align-left {
+  text-align: left !important;
+}
+.a11y-align-center {
+  text-align: center !important;
+}
+.a11y-align-right {
+  text-align: right !important;
+}
+.a11y-align-justify {
+  text-align: justify !important;
+}
+.a11y-font-dyslexia {
+  font-family:
+    Arial,
+    Helvetica,
+    sans-serif !important;
+}
+.a11y-font-readable {
+  font-family:
+    Verdana,
+    Tahoma,
+    sans-serif !important;
+}
+.a11y-cursor-big,
+.a11y-cursor-big * {
+  cursor: pointer !important;
+}
+.a11y-cursor-guide::after {
+  content: "";
+  position: fixed;
+  left: 0;
+  width: 100%;
+  height: 3px;
+  background: red;
+  pointer-events: none;
+}
+.a11y-cursor-mask {
+  background: rgba(0, 0, 0, 0.1);
+}
+.a11y-sat-low {
+  filter: saturate(0.5);
+}
+.a11y-sat-high {
+  filter: saturate(2);
+}
+.a11y-sat-desat {
+  filter: grayscale(1);
+}
+.a11y-noanim * {
+  animation: none !important;
+  transition: none !important;
+}
+.a11y-hideimg img {
+  display: none !important;
+}
+.a11y-tooltips [title] {
+  position: relative;
+}
+.a11y-tooltips [title]:hover::after {
+  content: attr(title);
+  position: absolute;
+  background: black;
+  color: white;
+  padding: 4px 6px;
+  font-size: 12px;
+  top: 100%;
+  left: 0;
+  white-space: nowrap;
+  z-index: 9999;
+}
+body[class*=a11y-] img.a11y-icon {
+  display: inline !important;
+}
+
+/* src/accessibility/styles/widget.css */
+.a11y-group button.active {
+  background: #5b3b6f;
+  color: white;
+  box-shadow: 0 0 0 2px #c9a9db inset;
+}
+.a11y-card.active {
+  background: #5b3b6f;
+  color: white;
+}
+.a11y-float {
+  position: fixed;
+  right: 20px;
+  top: 100px;
+  z-index: 9999;
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: #5b3b6f;
+  color: white;
+  border: none;
+  font-size: 22px;
+  cursor: pointer;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+  transition: 0.2s;
+}
+.a11y-float:hover {
+  transform: scale(1.05);
+}
+.a11y-container {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 360px;
+  height: 100%;
+  background: #f7f7f7;
+  box-shadow: -4px 0 10px rgba(0, 0, 0, 0.25);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  font-family: Arial, sans-serif;
+}
+.a11y-header {
+  background: #5b3b6f;
+  color: white;
+  padding: 14px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 16px;
+}
+.a11y-close {
+  cursor: pointer;
+  font-size: 18px;
+}
+.a11y-grid {
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  overflow-y: auto;
+}
+.a11y-group {
+  background: white;
+  border-radius: 10px;
+  padding: 10px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+.a11y-group p {
+  margin: 0 0 6px 0;
+  font-size: 13px;
+  font-weight: bold;
+}
+.a11y-group button {
+  margin: 3px;
+  padding: 6px 8px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  background: #e5e5e5;
+  cursor: pointer;
+  transition: 0.15s;
+}
+.a11y-group button:hover {
+  background: #d0c2db;
+}
+.a11y-card {
+  background: white;
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+  transition: 0.15s;
+}
+.a11y-card:hover {
+  background: #eee;
+}
+.a11y-container::-webkit-scrollbar {
+  width: 6px;
+}
+.a11y-container::-webkit-scrollbar-thumb {
+  background: #bbb;
+  border-radius: 4px;
+}
+@media (max-width: 600px) {
+  .a11y-container {
+    width: 100%;
+  }
+}
