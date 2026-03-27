@@ -145,31 +145,19 @@ export default function AccessibilityWidget() {
 
             <div className="a11y-group">
 
-              <p>Line Height</p>
+  <p>Line Height</p>
 
-              <button
-                className={state.line === 1 ? "active" : ""}
-                onClick={() => setLevel("line", 1)}
-              >
-                1.5x
-              </button>
+  {[1, 2, 3].map((n) => (
+    <button
+      key={n}
+      className={state.lineHeight === n ? "active" : ""}
+      onClick={() => setLevel("lineHeight", n)}
+    >
+      {n === 1 ? "1.5x" : n === 2 ? "1.75x" : "2x"}
+    </button>
+  ))}
 
-              <button
-                className={state.line === 2 ? "active" : ""}
-                onClick={() => setLevel("line", 2)}
-              >
-                1.75x
-              </button>
-
-              <button
-                className={state.line === 3 ? "active" : ""}
-                onClick={() => setLevel("line", 3)}
-              >
-                2x
-              </button>
-
-            </div>
-
+</div>
 
 
             {/* ALIGN */}
@@ -275,11 +263,11 @@ export default function AccessibilityWidget() {
 
 
             <div
-              className={`a11y-card ${state.dyslexia ? "active" : ""}`}
-              onClick={() => toggle("dyslexia")}
-            >
-              Dyslexia Font
-            </div>
+  className={`a11y-card ${state.font === "dyslexia" ? "active" : ""}`}
+  onClick={() => setMode("font", "dyslexia")}
+>
+  Dyslexia Font
+</div>
 
 
           </div>

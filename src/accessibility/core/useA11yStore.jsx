@@ -65,17 +65,31 @@ export function useA11yStore() {
 };
 const setMode = (key, value) => {
 
-  setState((s) => ({
+  setState((s) => {
 
-    ...s,
+    const current = s[key];
 
-    [key]: s[key] === value
-      ? getDefault(key)
-      : value,
+    return {
+      ...s,
+      [key]: current === value ? getDefault(key) : value,
+    };
 
-  }));
+  });
 
 };
+// const setMode = (key, value) => {
+
+//   setState((s) => ({
+
+//     ...s,
+
+//     [key]: s[key] === value
+//       ? getDefault(key)
+//       : value,
+
+//   }));
+
+// };
 const setLevel = (key, level) => {
 
   setState((s) => ({
@@ -118,8 +132,10 @@ function applyClasses(state) {
 
   const body = document.body;
 
-  body.className = "";
-
+  // body.className = "";
+body.classList.remove(
+  ...Array.from(body.classList).filter(c => c.startsWith("a11y-"))
+);
 
   // boolean
 
@@ -173,14 +189,58 @@ function applyClasses(state) {
 
 
   // cursor
+// =========================
+// CURSOR MODES
+// =========================
 
-  if (state.cursor !== "normal") {
-    body.classList.add(
-      "a11y-cursor-" + state.cursor
-    );
+  // Clean up previous cursor elements
+  const existingGuide = document.querySelector('.a11y-guide-line');
+  if (existingGuide) existingGuide.remove();
+  const existingMask = document.querySelector('.a11y-mask');
+  if (existingMask) existingMask.remove();
+  document.onmousemove = null;
+
+  if (state.cursor === "big") {
+
+    document.body.classList.add("a11y-cursor-big");
+
   }
 
+  if (state.cursor === "guide") {
 
+    document.body.classList.add("a11y-cursor-guide");
+
+    const line = document.createElement("div");
+    line.className = "a11y-guide-line";
+
+    document.body.appendChild(line);
+
+    document.onmousemove = (e) => {
+      line.style.top = e.clientY + "px";
+    };
+
+  }
+
+  if (state.cursor === "mask") {
+
+    document.body.classList.add("a11y-cursor-mask");
+
+    const mask = document.createElement("div");
+    mask.className = "a11y-mask";
+
+    document.body.appendChild(mask);
+
+    document.onmousemove = (e) => {
+      mask.style.background = `
+        radial-gradient(
+          circle at ${e.clientX}px ${e.clientY}px,
+          transparent 120px,
+          rgba(0,0,0,0.6) 200px
+        )
+      `;
+    };
+
+  }
   // line height
 
   if (state.lineHeight > 0) {
