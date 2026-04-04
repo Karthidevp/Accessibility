@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
-export function useA11yStore() {
 
+export function useA11yStore() {
  const [state, setState] = useState({
 
   contrast: "none",        // none | invert | dark | light
@@ -22,11 +22,86 @@ export function useA11yStore() {
 
   lineHeight: 0,           // 0 1 2 3
 
+  lowVision: false,
+
   align: "default",        // left right center justify
 
   saturation: "normal",    // normal low high desat
-
+  screenReader: "off" ,     // off | normal | slow | fast
+  widgetSize: "normal",   // normal | big
+  widgetPosition: "right", // left | right
+  colorBlindMode: "none", // none | protanopia | deuteranopia | tritanopia
 });
+
+//default settings
+const DEFAULT_STATE = {
+  contrast: "none",
+  links: false,
+  textSize: 0,
+  spacing: 0,
+  noanim: false,
+  hideimg: false,
+  font: "normal",
+  cursor: "normal",
+  tooltips: false,
+  lineHeight: 0,
+  align: "default",
+  saturation: "normal",
+  screenReader: "off",
+  colorBlindMode: "none",
+  lowVision: false,
+  widgetSize: "normal",
+  widgetPosition: "right",
+};
+
+const resetAll = () => {
+
+  // 1. Reset React state
+  setState(DEFAULT_STATE);
+
+  // 2. Clear localStorage
+  localStorage.removeItem("a11y");
+
+  // 3. Remove all a11y classes
+  const body = document.body;
+  body.classList.remove(
+    ...Array.from(body.classList).filter(c =>
+      c.startsWith("a11y-")
+    )
+  );
+
+  // 4. Stop screen reader
+  window.speechSynthesis.cancel();
+
+  // 5. Remove cursor effects
+  document.querySelector(".a11y-guide-line")?.remove();
+  document.querySelector(".a11y-mask")?.remove();
+  document.onmousemove = null;
+};
+
+/*color blind mode can be implemented by adding classes like a11y-colorblind-protanopia,
+ a11y-colorblind-deuteranopia, etc. 
+ and applying appropriate CSS filters to simulate the different types of color blindness. 
+ This allows users with color vision deficiencies to better distinguish between colors on the website.*/
+
+useEffect(() => {
+  document.body.classList.remove(
+    "cvd-protanopia",
+    "cvd-deuteranopia",
+    "cvd-tritanopia"
+  );
+
+  if (state.colorBlindMode !== "none") {
+    document.body.classList.add(`cvd-${state.colorBlindMode}`);
+  }
+}, [state.colorBlindMode]);
+
+//Force stop when turning OFF screen reader
+useEffect(() => {
+  if (state.screenReader === "off") {
+    window.speechSynthesis.cancel();
+  }
+}, [state.screenReader]);
 
   // Load saved settings
 
@@ -50,9 +125,141 @@ export function useA11yStore() {
       JSON.stringify(state)
     );
 
+    const handleSpeak = (event) => {
+      const target = event.target;
+      let text = target.textContent?.trim() || target.alt || target.getAttribute('aria-label') || target.getAttribute('title') || 'element';
+      if (text) {
+        const utterance = new SpeechSynthesisUtterance(text);
+        let rate = 1;
+        if (state.screenReader === 'slow') rate = 0.5;
+        if (state.screenReader === 'fast') rate = 1.5;
+        utterance.rate = rate;
+        speechSynthesis.speak(utterance);
+      }
+    };
+
     applyClasses(state);
 
   }, [state]);
+
+  useEffect(() => {
+    if (state.screenReader === "off") return;
+
+    const getRoleFromTag = (element) => {
+      const tag = element.tagName?.toLowerCase();
+      const type = element.getAttribute?.("type")?.toLowerCase();
+
+      if (element.hasAttribute("role")) {
+        return element.getAttribute("role");
+      }
+
+      switch (tag) {
+        case "button":
+          return "Button";
+        case "a":
+          return "Link";
+        case "img":
+          return "Image";
+        case "input":
+          return type === "checkbox"
+            ? "Checkbox"
+            : type === "radio"
+            ? "Radio button"
+            : type === "submit"
+            ? "Submit button"
+            : "Input";
+        case "textarea":
+          return "Text area";
+        case "select":
+          return "Select";
+        case "label":
+          return "Label";
+        default:
+          return tag ? tag.charAt(0).toUpperCase() + tag.slice(1) : "Element";
+      }
+    };
+
+    const getUsageText = (element) => {
+      const title = element.getAttribute("title");
+      const describedBy = element.getAttribute("aria-describedby");
+      const parts = [];
+
+      if (title) {
+        parts.push(title);
+      }
+
+      if (describedBy) {
+        const ids = describedBy.split(" ").filter(Boolean);
+        ids.forEach((id) => {
+          const descElement = document.getElementById(id);
+          if (descElement?.innerText) {
+            parts.push(descElement.innerText.trim());
+          }
+        });
+      }
+
+      return parts.join(" ");
+    };
+
+    const handleSpeak = (event) => {
+      const target = event.target.closest(
+        "button, a, input, textarea, select, img, label, [role]"
+      ) || event.target;
+
+      if (target.closest(".a11y-float")) {
+        return;
+      }
+
+      const label =
+        target.getAttribute("aria-label") ||
+        target.getAttribute("alt") ||
+        target.innerText?.trim() ||
+        target.getAttribute("placeholder") ||
+        target.getAttribute("title") ||
+        String(target.value || "").trim();
+
+      if (!label) return;
+
+      const role = getRoleFromTag(target);
+      const usage = getUsageText(target);
+      let text = role ? `${role}: ${label}` : label;
+
+      if (usage && usage !== label) {
+        text += `. Usage: ${usage}`;
+      }
+
+      if (text.length > 120) {
+        text = text.slice(0, 120) + "...";
+      }
+
+      window.speechSynthesis.cancel();
+      const utterance = new SpeechSynthesisUtterance(text);
+
+      switch (state.screenReader) {
+        case "slow":
+          utterance.rate = 0.4;
+          break;
+        case "fast":
+          utterance.rate = 1.7;
+          break;
+        default:
+          utterance.rate = 1;
+      }
+
+      utterance.pitch = 1;
+      requestAnimationFrame(() => {
+        window.speechSynthesis.speak(utterance);
+      });
+    };
+
+    document.body.addEventListener("click", handleSpeak);
+
+    return () => {
+      document.body.removeEventListener("click", handleSpeak);
+      window.speechSynthesis.cancel();
+    };
+
+  }, [state.screenReader]);
 
 
  const toggle = (key) => {
@@ -77,19 +284,16 @@ const setMode = (key, value) => {
   });
 
 };
-// const setMode = (key, value) => {
 
-//   setState((s) => ({
 
-//     ...s,
+// widget position toggle 
+const togglePosition = () => {
+  setState((s) => ({
+    ...s,
+    widgetPosition: s.widgetPosition === "right" ? "left" : "right",
+  }));
+};
 
-//     [key]: s[key] === value
-//       ? getDefault(key)
-//       : value,
-
-//   }));
-
-// };
 const setLevel = (key, level) => {
 
   setState((s) => ({
@@ -104,31 +308,36 @@ const setLevel = (key, level) => {
 
 };
 
-return {
-  toggle,
-  setMode,
-  setLevel,
-  state,
-};
-
+  return {
+    toggle,
+    setMode,
+    setLevel,
+    state,
+    resetAll,
+    reset: resetAll,
+    togglePosition,
+  };
 }
+
 function getDefault(key) {
-
   const defaults = {
-
     contrast: "none",
     font: "normal",
     cursor: "normal",
     align: "default",
     saturation: "normal",
-
+    screenReader: "off",
+    widgetSize: "normal",
+    widgetPosition: "right",
+    colorBlindMode: "none", 
   };
 
   return defaults[key] || 0;
-
 }
 
+
 function applyClasses(state) {
+  
 
   const body = document.body;
 
@@ -137,12 +346,14 @@ body.classList.remove(
   ...Array.from(body.classList).filter(c => c.startsWith("a11y-"))
 );
 
+
+
   // boolean
 
   if (state.links)
     body.classList.add("a11y-links");
 
-  if (state.noanim)
+  if (state.noanim && !state.lowVision)
     body.classList.add("a11y-noanim");
 
   if (state.hideimg)
@@ -170,6 +381,8 @@ body.classList.remove(
   }
 
 
+
+
   // spacing
 
   if (state.spacing > 0) {
@@ -188,6 +401,17 @@ body.classList.remove(
   }
 
 
+
+  // Widget size
+document.body.classList.remove("a11y-widget-big");
+if (state.widgetSize === "big") {
+  document.body.classList.add("a11y-widget-big");
+}
+
+// Widget position
+document.body.classList.remove("a11y-widget-left", "a11y-widget-right");
+document.body.classList.add("a11y-widget-" + state.widgetPosition);
+
   // cursor
 // =========================
 // CURSOR MODES
@@ -198,7 +422,10 @@ body.classList.remove(
   if (existingGuide) existingGuide.remove();
   const existingMask = document.querySelector('.a11y-mask');
   if (existingMask) existingMask.remove();
-  document.onmousemove = null;
+  if (window.__a11yMoveHandler) {
+    document.removeEventListener('mousemove', window.__a11yMoveHandler);
+    window.__a11yMoveHandler = null;
+  }
 
   if (state.cursor === "big") {
 
@@ -215,9 +442,17 @@ body.classList.remove(
 
     document.body.appendChild(line);
 
-    document.onmousemove = (e) => {
+    const handleGuideMove = (e) => {
+      const width = 330;
+      line.style.width = width + "px";
+      line.style.height = "8px";
+      line.style.left = e.clientX + "px";
       line.style.top = e.clientY + "px";
+      line.style.transform = "translate(-50%, -50%)";
     };
+
+    window.__a11yMoveHandler = handleGuideMove;
+    document.addEventListener("mousemove", handleGuideMove);
 
   }
 
@@ -230,15 +465,12 @@ body.classList.remove(
 
     document.body.appendChild(mask);
 
-    document.onmousemove = (e) => {
-      mask.style.background = `
-        radial-gradient(
-          circle at ${e.clientX}px ${e.clientY}px,
-          transparent 120px,
-          rgba(0,0,0,0.6) 200px
-        )
-      `;
+    const handleMaskMove = (e) => {
+      mask.style.top = e.clientY + "px";
     };
+
+    window.__a11yMoveHandler = handleMaskMove;
+    document.addEventListener("mousemove", handleMaskMove);
 
   }
   // line height
@@ -267,7 +499,50 @@ body.classList.remove(
     );
   }
 
+  if (state.lowVision) {
+    body.classList.add("a11y-lowvision");
+  }
+
 }
+
+
+
+
+
+
+
+
+
+
+// function handleSpeak(e) {
+
+//   const text = e.target.innerText?.trim();
+
+//   if (!text) return;
+
+//   const speech = new SpeechSynthesisUtterance(text);
+
+//   // 🔥 MODE CONTROL
+//   switch (window.a11yState?.screenReader) {
+
+//     case "slow":
+//       speech.rate = 0.7;
+//       break;
+
+//     case "fast":
+//       speech.rate = 1.5;
+//       break;
+
+//     default:
+//       speech.rate = 1;
+//   }
+
+//   speech.pitch = 1;
+
+//   window.speechSynthesis.cancel();
+//   window.speechSynthesis.speak(speech);
+
+// }
 
 // function applyClasses(state) {
 

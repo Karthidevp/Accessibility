@@ -1,0 +1,20 @@
+﻿export const A11Y_ICONS = {
+  contrast: "◐",
+  textSize: "A+",
+  saturation: "◍",
+  spacing: "≡",
+  lineHeight: "↕",
+  align: "☰",
+  screenReader: "🔈",
+  links: "🔗",
+  noanim: "⏸",
+  hideimg: "🚫",
+  font: "A",
+  cursor: "⌖",
+  colorBlind: "🧠",
+  lowVision: "🔆",
+  widgetSize: "⬛",
+  move: "↔",
+  hide: "✖",
+  reset: "↺"
+};
