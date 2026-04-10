@@ -55,9 +55,13 @@ const DEFAULT_STATE = {
 };
 
 const resetAll = () => {
+  const resetState = {
+    ...DEFAULT_STATE,
+    widgetSize: state.widgetSize,
+  };
 
   // 1. Reset React state
-  setState(DEFAULT_STATE);
+  setState(resetState);
 
   // 2. Clear localStorage
   localStorage.removeItem("a11y");
@@ -69,6 +73,12 @@ const resetAll = () => {
       c.startsWith("a11y-")
     )
   );
+  body.classList.remove(
+    "cvd-protanopia",
+    "cvd-deuteranopia",
+    "cvd-tritanopia"
+  );
+  body.style.removeProperty("filter");
 
   // 4. Stop screen reader
   window.speechSynthesis.cancel();
@@ -78,23 +88,6 @@ const resetAll = () => {
   document.querySelector(".a11y-mask")?.remove();
   document.onmousemove = null;
 };
-
-/*color blind mode can be implemented by adding classes like a11y-colorblind-protanopia,
- a11y-colorblind-deuteranopia, etc. 
- and applying appropriate CSS filters to simulate the different types of color blindness. 
- This allows users with color vision deficiencies to better distinguish between colors on the website.*/
-
-useEffect(() => {
-  document.body.classList.remove(
-    "cvd-protanopia",
-    "cvd-deuteranopia",
-    "cvd-tritanopia"
-  );
-
-  if (state.colorBlindMode !== "none") {
-    document.body.classList.add(`cvd-${state.colorBlindMode}`);
-  }
-}, [state.colorBlindMode]);
 
 //Force stop when turning OFF screen reader
 useEffect(() => {
@@ -124,19 +117,6 @@ useEffect(() => {
       "a11y",
       JSON.stringify(state)
     );
-
-    const handleSpeak = (event) => {
-      const target = event.target;
-      let text = target.textContent?.trim() || target.alt || target.getAttribute('aria-label') || target.getAttribute('title') || 'element';
-      if (text) {
-        const utterance = new SpeechSynthesisUtterance(text);
-        let rate = 1;
-        if (state.screenReader === 'slow') rate = 0.5;
-        if (state.screenReader === 'fast') rate = 1.5;
-        utterance.rate = rate;
-        speechSynthesis.speak(utterance);
-      }
-    };
 
     applyClasses(state);
 
@@ -503,6 +483,46 @@ document.body.classList.add("a11y-widget-" + state.widgetPosition);
     body.classList.add("a11y-lowvision");
   }
 
+  applyVisualFilter(state);
+
+}
+
+function applyVisualFilter(state) {
+  const body = document.body;
+  const filters = [];
+
+  if (state.colorBlindMode !== "none") {
+    filters.push(`url(#${state.colorBlindMode})`);
+  }
+
+  if (state.contrast === "invert") {
+    filters.push("invert(1)", "hue-rotate(180deg)");
+  }
+
+  switch (state.saturation) {
+    case "low":
+      filters.push("saturate(0.65)");
+      break;
+    case "high":
+      filters.push("saturate(1.6)");
+      break;
+    case "desat":
+      filters.push("saturate(0)");
+      break;
+    default:
+      break;
+  }
+
+  if (state.lowVision) {
+    filters.push("brightness(1.12)", "contrast(1.3)", "saturate(1.3)");
+  }
+
+  if (filters.length > 0) {
+    body.style.filter = filters.join(" ");
+    return;
+  }
+
+  body.style.removeProperty("filter");
 }
 
 

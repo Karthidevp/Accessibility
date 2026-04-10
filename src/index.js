@@ -1,17 +1,20 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+import React from "react";
+import { createRoot } from "react-dom/client";
+import AccessibilityWidget from "./accessibility/ui/AccessibilityWidget";
 
-const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+export function initAccessibilityWidget(config = {}) {
+  let container = document.getElementById("a11y-widget-root");
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+  if (!container) {
+    container = document.createElement("div");
+    container.id = "a11y-widget-root";
+    document.body.appendChild(container);
+  }
+
+  const root = createRoot(container);
+
+  // ✅ NO JSX here
+  root.render(
+    React.createElement(AccessibilityWidget, config)
+  );
+}

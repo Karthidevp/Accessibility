@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/ada/static/css/main.e57e9dd3.css",
+    "main.js": "/ada/static/js/main.c5a82017.js",
+    "index.html": "/ada/index.html",
+    "main.e57e9dd3.css.map": "/ada/static/css/main.e57e9dd3.css.map",
+    "main.c5a82017.js.map": "/ada/static/js/main.c5a82017.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e57e9dd3.css",
+    "static/js/main.c5a82017.js"
+  ]
+}

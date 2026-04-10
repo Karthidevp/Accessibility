@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useA11yStore } from "../core/useA11yStore";
 
 import "../styles/accessibility.css";
@@ -17,6 +18,130 @@ export default function AccessibilityWidget() {
   } = useA11yStore();
 
   const [open, setOpen] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [portalTarget, setPortalTarget] = useState(null);
+  const [dragLeft, setDragLeft] = useState(null);
+  const [isDraggingPanel, setIsDraggingPanel] = useState(false);
+  const openTimerRef = useRef(null);
+  const panelRef = useRef(null);
+  const dragStateRef = useRef(null);
+  const hasActiveAccessibilitySettings =
+    state.contrast !== "none" ||
+    state.links ||
+    state.textSize > 0 ||
+    state.spacing > 0 ||
+    state.noanim ||
+    state.hideimg ||
+    state.font !== "normal" ||
+    state.cursor !== "normal" ||
+    state.tooltips ||
+    state.lineHeight > 0 ||
+    state.lowVision ||
+    state.align !== "default" ||
+    state.saturation !== "normal" ||
+    state.screenReader !== "off" ||
+    state.colorBlindMode !== "none";
+
+  useEffect(() => {
+    let host = document.getElementById("a11y-widget-portal-root");
+    let created = false;
+
+    if (!host) {
+      host = document.createElement("div");
+      host.id = "a11y-widget-portal-root";
+      host.className = "a11y-widget-host";
+      document.documentElement.appendChild(host);
+      created = true;
+    }
+
+    setPortalTarget(host);
+
+    return () => {
+      if (openTimerRef.current) {
+        window.clearTimeout(openTimerRef.current);
+      }
+
+      if (created && host?.parentNode) {
+        host.parentNode.removeChild(host);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isDraggingPanel) {
+      return undefined;
+    }
+
+    const handlePointerMove = (event) => {
+      const dragState = dragStateRef.current;
+
+      if (!dragState) {
+        return;
+      }
+
+      const nextLeft = event.clientX - dragState.pointerOffset;
+      const maxLeft = Math.max(window.innerWidth - dragState.panelWidth - 20, 20);
+      const clampedLeft = Math.min(Math.max(nextLeft, 20), maxLeft);
+      setDragLeft(clampedLeft);
+    };
+
+    const handlePointerUp = (event) => {
+      const dragState = dragStateRef.current;
+
+      if (!dragState) {
+        setIsDraggingPanel(false);
+        setDragLeft(null);
+        return;
+      }
+
+      const dropOnRight = event.clientX >= window.innerWidth / 2;
+      const nextPosition = dropOnRight ? "right" : "left";
+
+      if (nextPosition !== state.widgetPosition) {
+        setMode("widgetPosition", nextPosition);
+      }
+
+      dragStateRef.current = null;
+      setIsDraggingPanel(false);
+      setDragLeft(null);
+    };
+
+    window.addEventListener("pointermove", handlePointerMove);
+    window.addEventListener("pointerup", handlePointerUp);
+
+    return () => {
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+    };
+  }, [isDraggingPanel, setMode, state.widgetPosition]);
+
+  useEffect(() => {
+    const handleShortcut = (event) => {
+      const target = event.target;
+      const tagName = target?.tagName?.toLowerCase();
+      const isEditable =
+        target?.isContentEditable ||
+        tagName === "input" ||
+        tagName === "textarea" ||
+        tagName === "select";
+
+      if (isEditable) {
+        return;
+      }
+
+      if (event.ctrlKey && !event.shiftKey && !event.altKey && event.key.toLowerCase() === "u") {
+        event.preventDefault();
+        setOpen((current) => !current);
+      }
+    };
+
+    window.addEventListener("keydown", handleShortcut);
+
+    return () => {
+      window.removeEventListener("keydown", handleShortcut);
+    };
+  }, []);
 
   const speakWidgetText = (text) => {
     if (state.screenReader === "off" || !text) return;
@@ -39,6 +164,52 @@ export default function AccessibilityWidget() {
     requestAnimationFrame(() => {
       window.speechSynthesis.speak(utterance);
     });
+  };
+
+  const handleFloatButtonClick = (event) => {
+    event.stopPropagation();
+
+    if (open) {
+      setOpen(false);
+      return;
+    }
+
+    if (isLoading) {
+      return;
+    }
+
+    if (hasLoadedOnce) {
+      setOpen(true);
+      return;
+    }
+
+    setIsLoading(true);
+    openTimerRef.current = window.setTimeout(() => {
+      setIsLoading(false);
+      setHasLoadedOnce(true);
+      setOpen(true);
+      openTimerRef.current = null;
+    }, 900);
+  };
+
+  const handlePanelDragStart = (event) => {
+    if (event.target.closest(".a11y-close")) {
+      return;
+    }
+
+    const panel = panelRef.current;
+
+    if (!panel) {
+      return;
+    }
+
+    const rect = panel.getBoundingClientRect();
+    dragStateRef.current = {
+      panelWidth: rect.width,
+      pointerOffset: event.clientX - rect.left,
+    };
+    setDragLeft(rect.left);
+    setIsDraggingPanel(true);
   };
 
   /* =========================
@@ -139,28 +310,58 @@ export default function AccessibilityWidget() {
     );
   };
 
+  if (!portalTarget) {
+    return null;
+  }
 
-  return (
-    <>
+  return createPortal(
+    <div className="a11y-widget-ui">
       {/* FLOAT BUTTON */}
       <button
         className={`a11y-float ${state.widgetPosition}`}
-        onClick={(event) => {
-          event.stopPropagation();
-          setOpen(!open);
-        }}
-        aria-label={open ? "Close accessibility menu" : "Open accessibility menu"}
-        title={open ? "Close accessibility menu" : "Open accessibility menu"}
+        onClick={handleFloatButtonClick}
+        aria-label={isLoading ? "Loading accessibility menu" : open ? "Close accessibility menu" : "Open accessibility menu"}
+        title={isLoading ? "Loading accessibility menu" : open ? "Close accessibility menu" : "Open accessibility menu"}
+        aria-busy={isLoading}
       >
-        ♿
+        {isLoading ? (
+          <span className="a11y-float-loader" aria-hidden="true" />
+        ) : (
+          <img
+            className="a11y-float-icon"
+            src="https://cdn.userway.org/widgetapp/images/body_wh.svg"
+            alt=""
+            role="presentation"
+          />
+        )}
+        {hasActiveAccessibilitySettings && (
+          <span
+            className="a11y-float-indicator"
+            aria-hidden="true"
+          >
+            ✓
+          </span>
+        )}
       </button>
 
       {/* PANEL */}
       {open && (
-        <div className={`a11y-container ${state.widgetPosition}`}>
+        <div
+          ref={panelRef}
+          className={`a11y-container ${state.widgetPosition} ${
+            state.widgetSize === "big" ? "big" : ""
+          } ${isDraggingPanel ? "dragging" : ""}`}
+          style={{
+            left: dragLeft !== null ? `${dragLeft}px` : undefined,
+            right: dragLeft !== null ? "auto" : undefined,
+          }}
+        >
 
           {/* HEADER */}
-          <div className="a11y-header">
+          <div
+            className="a11y-header"
+            onPointerDown={handlePanelDragStart}
+          >
             Accessibility Menu
             <span
               className="a11y-close"
@@ -255,7 +456,7 @@ export default function AccessibilityWidget() {
             />
 
             <CycleCard
-              label="Spacing"
+              label="Text Spacing"
               icon={A11Y_ICONS.spacing}
               value={state.spacing}
               options={[0, 1, 2, 3]}
@@ -280,7 +481,7 @@ export default function AccessibilityWidget() {
             />
 
             <CycleCard
-              label="Align"
+              label="Text Align"
               icon={A11Y_ICONS.align}
               value={state.align}
               options={["default", "left", "center", "right", "justify"]}
@@ -325,14 +526,14 @@ export default function AccessibilityWidget() {
             />
 
             <ToggleCard
-              label="Links"
+              label="Highlight Links"
               icon={A11Y_ICONS.links}
               active={state.links}
               onClick={() => toggle("links")}
             />
 
             <ToggleCard
-              label="Animations"
+              label="Pause Animations"
               icon={A11Y_ICONS.noanim}
               active={state.noanim && !state.lowVision}
               onClick={() => toggle("noanim")}
@@ -341,7 +542,7 @@ export default function AccessibilityWidget() {
             />
 
             <ToggleCard
-              label="Images"
+              label="Hide Images"
               icon={A11Y_ICONS.hideimg}
               active={state.hideimg}
               onClick={() => toggle("hideimg")}
@@ -373,7 +574,7 @@ export default function AccessibilityWidget() {
             >
               <span className="a11y-card-icon">{A11Y_ICONS.reset}</span>
               {'    '}
-              Reset All Settings
+              Reset All Accessibility Settings
             </button>
 
             <div className="a11y-footer-controls">
@@ -400,6 +601,7 @@ export default function AccessibilityWidget() {
 
         </div>
       )}
-    </>
+    </div>,
+    portalTarget
   );
 }

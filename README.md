@@ -68,3 +68,23 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+## CDN Usage Example
+
+You can load the published widget directly from the CDN using this HTML file:
+
+- `cdn-example.html`
+
+Example CDN usage:
+
+```html
+<script crossorigin src="https://unpkg.com/react@19/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@19/umd/react-dom.production.min.js"></script>
+<script src="https://unpkg.com/ada-accessibility-widget@1.0.4/dist/index.js"></script>
+```
+
+If you want to use jsDelivr instead, replace the last line with:
+
+```html
+<script src="https://cdn.jsdelivr.net/npm/ada-accessibility-widget@1.0.4/dist/index.js"></script>
+```
